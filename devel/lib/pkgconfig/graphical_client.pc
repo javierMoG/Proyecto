@@ -1,0 +1,8 @@
+prefix=/home/javiermg/Documents/ProyectoFinal/Proyecto/devel
+
+Name: graphical_client
+Description: Description of graphical_client
+Version: 1.0.0
+Cflags: -I/home/javiermg/Documents/ProyectoFinal/Proyecto/devel/include -I/home/javiermg/Documents/ProyectoFinal/Proyecto/src/graphical_client/include
+Libs: -L/home/javiermg/Documents/ProyectoFinal/Proyecto/devel/lib 
+Requires: ssl_shared_library

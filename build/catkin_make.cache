@@ -1,0 +1,2 @@
+graphical_client:pub_example:ssl_shared_library
+-DCATKIN_DEVEL_PREFIX=/home/javiermg/Documents/ProyectoFinal/Proyecto/devel -DCMAKE_INSTALL_PREFIX=/home/javiermg/Documents/ProyectoFinal/Proyecto/install -G Unix Makefiles
