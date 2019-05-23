@@ -22,43 +22,51 @@ int valueM1=0;
 int valueM2=0;
 
 // Direccion (1 adelante, -1 atras)
-int dir_1 = 1;
-int dir_2 = 1;
+int dirM1= 1;
+int dirM2 = 1;
 
-double velM1=20;
+double velM1=0;
 double velM2=0;
 
-double kpr = .9;
-double kir = .7;
-double kdr = 0.15;
+//Motor derecho
+double kpM2 = .9;
+double kiM2 = .7;
+double kdM2 = 0.15;
 
-double kpl = .9;
-double kil = .6;
-double kdl = 0.1;
+//Motor izquierdo
+double kpM1 = .9;
+double kiM1 = .6;
+double kdM1 = 0.1;
 
-double err_r = 0;
-double sum_err_r = 0;
-double prev_err_r = 0;
+//ErrorM2
+double errM2 = 0;
+double sumErrorM2= 0;
+double errorAntM2 = 0;
 
-double err_l = 0;
-double sum_err_l = 0;
-double prev_err_l = 0;
+//ErrorM1
+double errM1 = 0;
+double sumErrorM1 = 0;
+double errorAntM1 = 0;
 
-double pid_r = 0;
-double pid_l = 0;
+double pidM2 = 0;
+double pidM1 = 0;
 
-int out_r = 0;
-int out_l = 0;
+//correccion vel motores
+int corrM2 = 0;
+int corrM1 = 0;
 
 void setup() {
-        for (int i =8 ; i<14 ; i++)                     // Inicializamos los pines
-        pinMode(i, OUTPUT);
+  //Inicializamos
+        for (int i =8 ; i<14 ; i++)                     
+          pinMode(i, OUTPUT);
 
-        pinMode(A0, INPUT);//Lectura Motor1
-        pinMode(A1, INPUT);//Lectura Motor2
-
+        //Activamos los motores
         digitalWrite(E1, HIGH);
         digitalWrite(E2, HIGH);
+
+        pinMode(A0, INPUT);//Inicializamos la lectura de Motor1
+        pinMode(A1, INPUT);//Inicializamos la lectura de Motor2
+        
         Serial.begin(9600);
         tiempo = millis();
 }
@@ -83,48 +91,46 @@ void loop()
       
       if(millis() >= tiempo+250){
 
-        //PID
+    //PID
     
-    // Error actual es target - velocidad en ticks/segundo
-    err_r = velM2 - (1000/250)*contM2*dir_1;
-    err_l = velM1 - (1000/250)*contM1*dir_2;
+    // Error es velocidad deseada - velocidad detectada en orificios/segundo
+    errM2 = velM2 - 4*contM2*dirM2;
+    errM1 = velM1 - 4*contM1*dirM1;
 
     // Error integral
-    sum_err_r += err_r;
-    sum_err_l += err_l;
+    sumErrorM2 += errM2;
+    sumErrorM1 += errM1;
 
     // PID completo
-    pid_r = err_r*kpr + (err_r - prev_err_r)*kdr + sum_err_r*kir;
-    pid_l = err_l*kpl + (err_l - prev_err_l)*kdl + sum_err_l*kil;
+    pidM2 = errM2*kpM2 + (errM2 - errorAntM2)*kdM2 + sumErrorM2*kiM2;
+    pidM1 = errM1*kpM1 + (errM1 - errorAntM1)*kdM1 + sumErrorM1*kiM1;
 
     // Actualizar error previo
-    prev_err_r = err_r;
-    prev_err_l = err_l;
+    errorAntM2= errM2;
+    errorAntM1= errM1;
 
     // Ajustar salida
-    out_r = min(abs(pid_r), 255);
-    out_l = min(abs(pid_l), 255);
+    corrM2 = min(abs(pidM2), 255);
+    corrM1= min(abs(pidM1), 255);
     
-    // Por ahora, solo hay targets positivos.
-    if (pid_r >= 0){
-      analogWrite(I1, out_r);
+    if (pidM2 >= 0){
+      analogWrite(I1, corrM2);
       analogWrite(I2, 0);
-      dir_1 = 1;
+      dirM2 = 1;
     }else{
       analogWrite(I1, 0);
-      analogWrite(I2, out_r);
-      dir_1 = -1;
+      analogWrite(I2, corrM2);
+      dirM2 = -1;
     }
     
-    // Por ahora, solo hay targets positivos
-    if (pid_l >= 0){
-      analogWrite(I4, out_l);
+    if (pidM1 >= 0){
+      analogWrite(I4, corrM1);
       analogWrite(I3, 0);
-      dir_2 = 1;
+      dirM1 = 1;
     }else{
       analogWrite(I4, 0);
-      analogWrite(I3, out_l);
-      dir_2 = -1;
+      analogWrite(I3, corrM1);
+      dirM1 = -1;
     }
 
       contM1=0;
